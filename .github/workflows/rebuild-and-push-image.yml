@@ -1,0 +1,42 @@
+name: Rebuild & push image
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Extract version and set tag
+        shell: bash
+        run: |
+          echo "::set-output name=version::$(cat VERSION)"
+          echo "::set-output name=tags::$(cat VERSION) latest"
+        id: version_tags
+
+      - name: Build Image
+        id: build-image
+        # https://github.com/marketplace/actions/buildah-build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          dockerfiles: docker/Dockerfile
+          image: fluentd-splunk-hec
+          tags: ${{ steps.version_tags.outputs.tags }}
+          oci: true
+          build-args: |
+            VERSION=${{ steps.version_tags.outputs.version }}
+
+      - name: Push To Quay
+        # https://github.com/marketplace/actions/push-to-registry
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: quay.io/packit
+          username: ${{ secrets.QUAY_IMAGE_BUILDER_USERNAME }}
+          password: ${{ secrets.QUAY_IMAGE_BUILDER_TOKEN }}
