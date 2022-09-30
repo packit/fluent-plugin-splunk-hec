@@ -14,7 +14,7 @@ build: clean_pkg
 
 .PHONY: docker
 docker:
-	@docker buildx build --no-cache --pull --platform linux/amd64 -o type=image,name=splunk/fluentd-hec:$(VERSION),push=false --build-arg VERSION=$(VERSION) . -f docker/Dockerfile
+	@docker buildx build --no-cache --pull --platform linux/amd64 -t splunk/fluentd-hec:$(VERSION) --build-arg VERSION=$(VERSION) . -f docker/Dockerfile
 
 docker-rebuild:
 	@docker buildx build --platform linux/amd64 -o type=image,name=splunk/fluentd-hec:$(VERSION),push=false --build-arg VERSION=$(VERSION) . -f docker/Dockerfile
