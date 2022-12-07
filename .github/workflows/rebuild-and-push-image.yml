@@ -3,20 +3,20 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - $default-branch
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Extract version and set tag
         shell: bash
         run: |
-          echo "::set-output name=version::$(cat VERSION)"
-          echo "::set-output name=tags::$(cat VERSION) latest"
+          echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+          echo "tags=$(cat VERSION) latest" >> $GITHUB_OUTPUT
         id: version_tags
 
       - name: Build Image
